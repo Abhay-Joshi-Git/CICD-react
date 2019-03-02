@@ -2,7 +2,7 @@
   "AWSEBDockerrunVersion": 2,
   "containerDefinitions": [
     {
-      "name": "nginx-client",
+      "name": "cicd-react-nginx-simple",
       "image": "abhayj/cicd-react-nginx-simple",
       "hostname": "nginx",
       "essential": true,
