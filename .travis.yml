@@ -4,6 +4,7 @@ env:
   global:
   - GCP_PROJECT_ID=react-cicd-travis-cloud-run
   - IMAGE=gcr.io/react-cicd-travis-cloud-run/cicd-react-cloud-run
+  - TEST_IMAGE=gcr.io/cicd-react-cloud-run
   - CLOUD_RUN_SERVICE=cicd-react-cloud-run
   - CLOUD_RUN_REGION=asia-northeast1
   - CLOUDSDK_CORE_DISABLE_PROMPTS=1
@@ -14,6 +15,9 @@ before_install:
 - gcloud auth activate-service-account --key-file=gcp-key.json
 - gcloud auth configure-docker    # enable "docker push" to gcr
 - gcloud config set project "${GCP_PROJECT_ID}"
+- docker build -t "${TEST_IMAGE}:${TRAVIS_COMMIT}" -f Dockerfile.dev .
+- docker run "${TEST_IMAGE}:${TRAVIS_COMMIT}" npm run lint
+- docker run "${TEST_IMAGE}:${TRAVIS_COMMIT}" npm run test -- --coverage --watchAll=false
 install: true # no-op
 script:
 - |

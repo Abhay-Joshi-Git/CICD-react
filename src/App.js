@@ -8,11 +8,11 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <span class="center">
+          <span className="center">
             <span>Simple react application</span>
           </span>
         </header>
-        <div class="App-body">
+        <div className="App-body">
           some main content
         </div>
       </div>

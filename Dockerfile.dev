@@ -1,0 +1,6 @@
+FROM node:alpine
+WORKDIR '/app'
+COPY package.json	.
+RUN npm set progress=false && npm i --silent
+COPY . .
+CMD ["npm", "start"]
