@@ -9,11 +9,11 @@ class App extends Component {
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
           <span class="center">
-            <span>Simple CICD Application</span>
+            <span>Simple react application</span>
           </span>
         </header>
         <div class="App-body">
-          main content
+          some main content
         </div>
       </div>
     );
