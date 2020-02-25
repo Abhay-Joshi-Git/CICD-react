@@ -1,2 +1,4 @@
 node_modules
 .DS_Store
+gcp-key.json
+build
