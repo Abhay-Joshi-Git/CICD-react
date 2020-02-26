@@ -1,0 +1,14 @@
+dist
+config
+coverage
+node_modules
+package.json
+gulpfile.js
+*.ts
+*.tsx
+scripts
+webpack
+servers
+build
+*/serviceWorker.js
+*.test.js

@@ -1,34 +1,27 @@
-sudo: required
-services: docker
-branches:
-  only: master
-env:
-  global:
-  - GCP_PROJECT_ID=react-cicd-travis-cloud-run
-  - IMAGE=gcr.io/react-cicd-travis-cloud-run/cicd-react-cloud-run
-  - TEST_IMAGE=gcr.io/cicd-react-cloud-run
-  - CLOUD_RUN_SERVICE=cicd-react-cloud-run
-  - CLOUD_RUN_REGION=asia-northeast1
-  - CLOUDSDK_CORE_DISABLE_PROMPTS=1
-before_install:
-- openssl aes-256-cbc -K $encrypted_0e5954dbbcc6_key -iv $encrypted_0e5954dbbcc6_iv -in gcp-key.json.enc -out gcp-key.json -d
-- curl https://sdk.cloud.google.com | bash > /dev/null
-- source "$HOME/google-cloud-sdk/path.bash.inc"
-- gcloud auth activate-service-account --key-file=gcp-key.json
-- gcloud auth configure-docker    # enable "docker push" to gcr
-- gcloud config set project "${GCP_PROJECT_ID}"
-- docker build -t "${TEST_IMAGE}:${TRAVIS_COMMIT}" -f Dockerfile.dev .
-- docker run "${TEST_IMAGE}:${TRAVIS_COMMIT}" npm run lint
-- docker run "${TEST_IMAGE}:${TRAVIS_COMMIT}" npm run test -- --coverage --watchAll=false
-install: true # no-op
+language: node_js
+node_js:
+ - "13"
+
+cache:
+  directories:
+    - a/node_modules
+    - b/node_modules
+
+install:
+  - npm install
+  - npm --prefix ./a install ./a
+  - npm --prefix ./b install ./b
+
 script:
-- |
-  set -ex;
-  docker build -t "${IMAGE}:${TRAVIS_COMMIT}" . && \
-  docker push "${IMAGE}:${TRAVIS_COMMIT}" && \
-  gcloud run deploy "${CLOUD_RUN_SERVICE}" \
-    --image="${IMAGE}:${TRAVIS_COMMIT}" \
-    --platform=managed \
-    --region="${CLOUD_RUN_REGION}" \
-    --allow-unauthenticated;
-  set +x
+  - if output=$(git status --short | grep -c a/); then
+      cd a;
+      npm run lint;
+      npm run test;
+      npm run build;
+    fi
+  - if output=$(git status --short | grep -c b/); then
+      cd b;
+      npm run lint;
+      npm run test;
+      npm run build;
+    fi
