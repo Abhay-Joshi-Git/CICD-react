@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import logo from './cicd-logo.jpg';
 import './App.scss';
 
-var g;
-var v;
 class App extends Component {
   render() {
     return (
