@@ -5,8 +5,7 @@ import App from './App';
 it('renders without crashing', () => {
   const div = document.createElement('div');
   ReactDOM.render(<App />, div);
-  ReactDOM.unmountComponentAtNode(div);
-  const header = document.getElementById('h2');
-  // expect(header).toBeTruthy();
+  const header = div.querySelector('h2');
   expect(header).toBeFalsy();
+  ReactDOM.unmountComponentAtNode(div);
 });
