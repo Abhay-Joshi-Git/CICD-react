@@ -9,3 +9,11 @@ it('renders without crashing', () => {
   expect(header).toBeFalsy();
   ReactDOM.unmountComponentAtNode(div);
 });
+
+it('other test', () => {
+  let container = document.createElement('div');
+  ReactDOM.render(<App />, container);
+  const header = container.querySelector('h2');
+  expect(header).toBeTruthy();
+  ReactDOM.unmountComponentAtNode(container);
+});

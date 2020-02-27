@@ -15,6 +15,9 @@ class App extends Component {
         <div className="App-body">
           some main content
         </div>
+        <h3>
+          some heading
+        </h3>
       </div>
     );
   }
