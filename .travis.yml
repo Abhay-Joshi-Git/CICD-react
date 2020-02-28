@@ -5,9 +5,11 @@ branches:
 env:
   global:
   - GCP_PROJECT_ID=react-cicd-travis-cloud-run
-  - IMAGE=gcr.io/react-cicd-travis-cloud-run/cicd-react-cloud-run
+  - IMAGE_PROJECT_A=gcr.io/react-cicd-travis-cloud-run/cicd-react-cloud-run
+  - IMAGE_PROJECT_B=gcr.io/react-cicd-travis-cloud-run/second-project
   - TEST_IMAGE=gcr.io/cicd-react-cloud-run
-  - CLOUD_RUN_SERVICE=cicd-react-cloud-run
+  - CLOUD_RUN_SERVICE_PROJECT_A=cicd-react-cloud-run
+  - CLOUD_RUN_SERVICE_PROJECT_B=second-project
   - CLOUD_RUN_REGION=asia-northeast1
   - CLOUDSDK_CORE_DISABLE_PROMPTS=1
 before_install:
@@ -17,18 +19,36 @@ before_install:
 - gcloud auth activate-service-account --key-file=gcp-key.json
 - gcloud auth configure-docker    # enable "docker push" to gcr
 - gcloud config set project "${GCP_PROJECT_ID}"
-- docker build -t "${TEST_IMAGE}:${TRAVIS_COMMIT}" -f Dockerfile.dev .
-- docker run "${TEST_IMAGE}:${TRAVIS_COMMIT}" npm run lint
-- docker run "${TEST_IMAGE}:${TRAVIS_COMMIT}" npm run test -- --coverage --watchAll=false
-install: true # no-op
+install:
+  - npm install
+  - npm --prefix ./a install ./a
+  - npm --prefix ./b install ./b
 script:
-- |
-  set -ex;
-  docker build -t "${IMAGE}:${TRAVIS_COMMIT}" . && \
-  docker push "${IMAGE}:${TRAVIS_COMMIT}" && \
-  gcloud run deploy "${CLOUD_RUN_SERVICE}" \
-    --image="${IMAGE}:${TRAVIS_COMMIT}" \
-    --platform=managed \
-    --region="${CLOUD_RUN_REGION}" \
-    --allow-unauthenticated;
-  set +x
+- if git diff --name-only HEAD^ | grep -c "a/"; then
+    set -ex;
+    cd a;
+    npm run lint;
+    npm run test -- --coverage --watchAll=false;
+    docker build -t "${IMAGE_PROJECT_A}:${TRAVIS_COMMIT}" .;
+    docker push "${IMAGE_PROJECT_A}:${TRAVIS_COMMIT}";
+    gcloud run deploy "${CLOUD_RUN_SERVICE_PROJECT_A}"
+      --image="${IMAGE_PROJECT_A}:${TRAVIS_COMMIT}" 
+      --platform=managed 
+      --region="${CLOUD_RUN_REGION}" 
+      --allow-unauthenticated;
+    set +x;
+  fi
+- if git diff --name-only HEAD^ | grep -c "b/"; then
+    set -ex;
+    cd ../b;
+    npm run lint;
+    npm run test -- --coverage --watchAll=false;
+    docker build -t "${IMAGE_PROJECT_B}:${TRAVIS_COMMIT}" .;
+    docker push "${IMAGE_PROJECT_B}:${TRAVIS_COMMIT}";
+    gcloud run deploy "${CLOUD_RUN_SERVICE_PROJECT_B}"
+      --image="${IMAGE_PROJECT_B}:${TRAVIS_COMMIT}"
+      --platform=managed
+      --region="${CLOUD_RUN_REGION}"
+      --allow-unauthenticated;
+    set +x;
+  fi
